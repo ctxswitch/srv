@@ -32,7 +32,7 @@ func (t *Transformer) Handler(next srv.Handler) srv.Handler {
 
 func ReadHandler(next srv.Handler) srv.Handler {
 	return srv.HandlerFunc(func(w srv.ResponseWriter, r *srv.Request) {
-		fmt.Println("[Parse]: entry")
+		fmt.Println("[ReadHandler]: entry")
 
 		b, err := r.Read()
 		if err != nil {
@@ -43,7 +43,7 @@ func ReadHandler(next srv.Handler) srv.Handler {
 		r.Data = b
 
 		next.ServeTCP(w, r)
-		fmt.Println("[Parse]: exit")
+		fmt.Println("[ReadHandler]: exit")
 	})
 }
 
