@@ -20,7 +20,7 @@ func (h EchoHandler) ServeTCP(w srv.ResponseWriter, r *srv.Request) {
 
 type Transformer struct{}
 
-func (t *Transformer) Middleware(next srv.Handler) srv.Handler {
+func (t *Transformer) Handler(next srv.Handler) srv.Handler {
 	return srv.HandlerFunc(func(w srv.ResponseWriter, r *srv.Request) {
 		fmt.Println("[Transformer]: entry")
 		r.Data = bytes.ToUpper(r.Data.([]byte))
@@ -30,7 +30,7 @@ func (t *Transformer) Middleware(next srv.Handler) srv.Handler {
 	})
 }
 
-func Parser(next srv.Handler) srv.Handler {
+func ReadHandler(next srv.Handler) srv.Handler {
 	return srv.HandlerFunc(func(w srv.ResponseWriter, r *srv.Request) {
 		fmt.Println("[Parse]: entry")
 
@@ -48,13 +48,16 @@ func Parser(next srv.Handler) srv.Handler {
 }
 
 func main() {
-	t := Transformer{}
+	server := srv.Server{}
 
 	rts := srv.NewRouter()
 	rts.Handle(&EchoHandler{})
-	rts.Use(Parser)
-	rts.Use(t.Middleware)
 
-	err := srv.ListenAndServe("tcp", "127.0.0.1:9000", rts)
+	rts.Use(ReadHandler)
+
+	transform := Transformer{}
+	rts.Use(transform.Handler)
+
+	err := server.ListenAndServe("tcp", "127.0.0.1:9000", rts)
 	fmt.Println(err.Error())
 }

@@ -15,6 +15,12 @@ type Server struct {
 	limiter        *Limiter
 }
 
+func (s *Server) ListenAndServe(network string, addr string, handler Handler) error {
+	s.defaulted()
+	s.handler = handler
+	return s.serve(network, addr)
+}
+
 func (s *Server) serve(network string, addr string) error {
 	l, err := net.Listen(network, addr)
 	if err != nil {
@@ -73,11 +79,4 @@ func (s *Server) defaulted() {
 	}
 
 	s.limiter = NewLimiter(s.MaxConnections)
-}
-
-func ListenAndServe(network string, addr string, handler Handler) error {
-	s := Server{}
-	s.defaulted()
-	s.handler = handler
-	return s.serve(network, addr)
 }
