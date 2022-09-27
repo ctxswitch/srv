@@ -70,7 +70,7 @@ func (rt *Router) ServeTCP(w ResponseWriter, r *Request) {
 		}
 	}
 	if handler == nil {
-		panic("a handler was not defined")
+		panic("a handler was not defined for the router")
 	}
 	handler.ServeTCP(w, r)
 }

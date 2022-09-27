@@ -12,7 +12,7 @@ type Server struct {
 	BaseContext    context.Context
 	ReadTimeout    time.Duration
 	handler        Handler
-	pool           *Pool
+	limiter        *Limiter
 }
 
 func (s *Server) serve(network string, addr string) error {
@@ -33,7 +33,7 @@ func (s *Server) serve(network string, addr string) error {
 		case <-ctx.Done():
 			return nil
 		default:
-			s.pool.Add()
+			s.limiter.Add()
 			go s.handleConnection(c)
 		}
 	}
@@ -44,7 +44,7 @@ func (s *Server) handleConnection(c net.Conn) {
 	defer func() {
 		cancel()
 		c.Close()
-		s.pool.Remove()
+		s.limiter.Remove()
 	}()
 
 	r := &Request{
@@ -72,7 +72,7 @@ func (s *Server) defaulted() {
 		s.MaxConnections = 1
 	}
 
-	s.pool = NewPool(s.MaxConnections)
+	s.limiter = NewLimiter(s.MaxConnections)
 }
 
 func ListenAndServe(network string, addr string, handler Handler) error {
