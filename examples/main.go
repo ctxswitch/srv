@@ -9,7 +9,7 @@ import (
 
 type EchoHandler struct{}
 
-func (h EchoHandler) ServeTCP(w srv.ResponseWriter, r *srv.Request) {
+func (h *EchoHandler) ServeTCP(w srv.ResponseWriter, r *srv.Request) {
 	fmt.Println("[EchoHandler]: entry")
 	_, err := w.Write(r.Data.([]byte))
 	if err != nil {
@@ -55,7 +55,7 @@ func main() {
 
 	rts.Use(ReadHandler)
 
-	transform := Transformer{}
+	transform := &Transformer{}
 	rts.Use(transform.Handler)
 
 	err := server.ListenAndServe("tcp", "127.0.0.1:9000", rts)
