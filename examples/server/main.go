@@ -68,20 +68,21 @@ func (e *Encryption) decrypt(b []byte) ([]byte, error) {
 func (e *Encryption) Handler(next srv.Handler) srv.Handler {
 	return srv.HandlerFunc(func(w srv.ResponseWriter, r *srv.Request) {
 		fmt.Println("[Encryption]: decrypt")
-		// do I need to strip the newline?
+
 		decoded, err := e.decode(r.Data.([]byte))
 		if err != nil {
-			r.Data = []byte("error")
+			w.Write([]byte("+error: decode\r\n"))
 			return
 		}
 		msg, err := e.decrypt(decoded)
 		if err != nil {
-			r.Data = []byte("error")
+			w.Write([]byte("+error: decrypt\r\n"))
 			return
 		}
 		r.Data = msg
+
 		next.ServeTCP(w, r)
-		// encrypt for write?
+		// encrypt for return
 		fmt.Println("[Encryption]: exit")
 	})
 }
@@ -92,7 +93,7 @@ func ReadHandler(next srv.Handler) srv.Handler {
 
 		b, err := r.Read()
 		if err != nil {
-			w.Write([]byte("error\r\n"))
+			w.Write([]byte("+error: read\r\n"))
 			return
 		}
 
